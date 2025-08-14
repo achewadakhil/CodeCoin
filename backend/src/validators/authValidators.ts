@@ -1,6 +1,7 @@
 
 import type { Request, Response, NextFunction } from "express";
 import {z} from "zod";
+import jwt from "jsonwebtoken";
 
 const userSchema = z.object({
   email: z.string().email(),
@@ -16,5 +17,8 @@ export default function validateUser(req: Request, res: Response, next: NextFunc
         errors: result.error.flatten().fieldErrors
     });
   }
+  const {email} = req.body;
+  const token = jwt.sign({ email }, process.env.JWT_SECRET || "Hello");
+  res.setHeader("token", token);
   next();
 }

@@ -2,7 +2,7 @@
 import type { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import UserModel from "../models/userModel.js";
-import type e from "express";
+
 export default async function UserSignup(req: Request, res: Response) {
     const {email , password} = req.body;
     try{
@@ -10,6 +10,7 @@ export default async function UserSignup(req: Request, res: Response) {
             email,
             password : await bcrypt.hash(password, 10)
         });
+        
         res.status(201).json({
             message: "User created successfully",
         });
@@ -20,6 +21,7 @@ export default async function UserSignup(req: Request, res: Response) {
     }
 
 }
+
 export async function UserLogin(req: Request, res: Response) {
     const { email, password } = req.body;
 
