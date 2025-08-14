@@ -1,7 +1,12 @@
 # Environment variables
 .env
+
+# Dependencies
 node_modules/
 
+# Build output
 dist/
+
 # Logs
-logs
+logs/
+*.log
