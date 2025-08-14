@@ -1,0 +1,7 @@
+# Environment variables
+.env
+node_modules
+
+dist
+# Logs
+logs
