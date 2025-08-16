@@ -1,7 +1,6 @@
 import fetch from "node-fetch";
-import type { Request, Response } from "express";
 
-export default async function getProblemMappings(req: Request, res: Response) {
+export default async function getProblemMappings() {
   const limit = 100;
   let skip = 0;
   const mapping: Record<string, string> = {};
@@ -43,12 +42,12 @@ export default async function getProblemMappings(req: Request, res: Response) {
 
       if (data.errors) {
         console.error("GraphQL Errors:", data.errors);
-        return res.status(500).json({ error: "LeetCode GraphQL error", details: data.errors });
+        return null;
       }
 
       if (!data.data || !data.data.problemsetQuestionListV2) {
         console.error("Unexpected response:", data);
-        return res.status(500).json({ error: "Invalid response from LeetCode" });
+        return null;
       }
 
       const questions = data.data.problemsetQuestionListV2.questions;
@@ -66,9 +65,9 @@ export default async function getProblemMappings(req: Request, res: Response) {
       if (questions.length < limit) break;
     }
 
-    res.json(mapping);
+    return mapping;
   } catch (err) {
     console.error("Failed to fetch problems:", err);
-    res.status(500).json({ error: "Failed to fetch problems" });
+    return null;
   }
 }

@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import authRouter from "./routes/authRoutes.js";
 import mongoose from "mongoose";
 import codeRouter from "./routes/leetcodeRoutes.js";
+import "./utils/refreshingData.js";
 
 dotenv.config();
 
