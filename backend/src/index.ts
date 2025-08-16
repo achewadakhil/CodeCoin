@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import authRouter from "./routes/authRoutes.js";
 import mongoose from "mongoose";
+import codeRouter from "./routes/leetcodeRoutes.js";
 
 dotenv.config();
 
@@ -10,6 +11,7 @@ const app = express();
 app.use(express.json());
 
 app.use("/auth",authRouter);
+app.use("/leetcode",codeRouter);
 
 (async () => {
   const mongoUri = process.env.MONGODB_URI;
