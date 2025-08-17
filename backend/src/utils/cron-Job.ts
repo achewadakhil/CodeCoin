@@ -4,9 +4,8 @@ import { setQuestions } from "../cache/questionCache.js";
 import getSet from "./todayQuestions.js";
 import dailyQuestionModel from "../models/dailyQuestion.js";
 
-
 //refreshing data every month on the 1st
-cron.schedule("* * * * *", async () => {
+cron.schedule("0 0 1 * *", async () => {
     try{
         let mapping;
         console.log("Fetching problem mappings...");
@@ -22,7 +21,7 @@ cron.schedule("* * * * *", async () => {
 
 
 // Refreshing daily questions at 0:02
-cron.schedule("* * * * *", async () => {
+cron.schedule("2 0 * * *", async () => {
     console.log("Checking for updated problem mappings...");
     const todaySet = await getSet();
     if (todaySet instanceof Set) {

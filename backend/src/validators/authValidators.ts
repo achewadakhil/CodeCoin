@@ -1,24 +1,45 @@
 
 import type { Request, Response, NextFunction } from "express";
 import {z} from "zod";
-import jwt from "jsonwebtoken";
+import checkLeetCodeUser from "../utils/isValidUser.js";
 
-const userSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6).max(100),
-});
-
-
-export default function validateUser(req: Request, res: Response, next: NextFunction) {
-  const result = userSchema.safeParse(req.body);
-  if (!result.success) {
-    return res.status(400).json({ 
-        error: "Invalid user data",
-        errors: result.error,
+export async function signUpValidation(req: Request, res: Response, next: NextFunction) {
+    const schema = z.object({
+        email: z.string().email({ message: "Invalid email format" }),
+        password: z.string().min(6).max(100),
+        username: z.string().min(3).max(100)
     });
-  }
-  const {email} = req.body;
-  const token = jwt.sign({ email }, process.env.JWT_SECRET || "Hello");
-  res.setHeader("token", token);
-  next();
+
+    try {
+        const validator = schema.safeParse(req.body);
+        if (!validator.success) {
+            return res.status(400).json({ message: "Invalid input data" });
+        }
+        const {username} = req.body;
+        const isValid = await checkLeetCodeUser(username);
+
+        if (!isValid) {
+            return res.status(400).json({ message: "Invalid LeetCode username" });
+        }
+        next();
+    } catch (error) {
+        res.status(400).json({ message: "Invalid input data" });
+    }
+}
+
+export async function signInValidation(req: Request, res: Response, next: NextFunction) {
+    const schema = z.object({
+        email: z.string().email({ message: "Invalid email format" }),
+        password: z.string().min(6).max(100)
+    });
+
+    try {
+        const validator = schema.safeParse(req.body);
+        if (!validator.success) {
+            return res.status(400).json({ message: "Invalid input data" });
+        }
+        next();
+    } catch (error) {
+        res.status(400).json({ message: "Invalid input data" });
+    }
 }

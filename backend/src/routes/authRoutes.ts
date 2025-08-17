@@ -1,13 +1,13 @@
-import UserSignup, { UserLogin } from "../controllers/authControllers.js";
+import { UserLogin, UserSignup } from "../controllers/authControllers.js";
 import express from "express";
 
 import { Router } from "express";
-import validateUser from "../validators/authValidators.js";
+import { signInValidation, signUpValidation } from "../validators/authValidators.js";
 
 const authRouter = Router();
 
-authRouter.post("/signup",validateUser,UserSignup);
+authRouter.post("/signup", signUpValidation, UserSignup);
 
-authRouter.post("/login",validateUser,UserLogin);
+authRouter.post("/login", signInValidation, UserLogin);
 
 export default authRouter;

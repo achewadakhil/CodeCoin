@@ -3,7 +3,8 @@ import dotenv from "dotenv";
 import authRouter from "./routes/authRoutes.js";
 import mongoose from "mongoose";
 import codeRouter from "./routes/leetcodeRoutes.js";
-import "./utils/refreshingData.js";
+import "./utils/cron-Job.js";
+import dailyQuestionRouter from "./routes/dailyQuestions.js";
 
 dotenv.config();
 
@@ -13,6 +14,7 @@ app.use(express.json());
 
 app.use("/auth",authRouter);
 app.use("/leetcode",codeRouter);
+app.use("/daily-questions", dailyQuestionRouter);
 
 (async () => {
   const mongoUri = process.env.MONGODB_URI;

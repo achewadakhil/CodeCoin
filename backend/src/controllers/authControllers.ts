@@ -2,15 +2,20 @@
 import type { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import UserModel from "../models/userModel.js";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+dotenv.config();
 
-export default async function UserSignup(req: Request, res: Response) {
-    const {email , password} = req.body;
+export async function UserSignup(req: Request, res: Response) {
+    const {email , password , username} = req.body;
     try{
-        await UserModel.create({
+        const user = await UserModel.create({
             email,
-            password : await bcrypt.hash(password, 10)
+            password : await bcrypt.hash(password, 10),
+            username
         });
-        
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET  || "");
+        res.setHeader("token", token);
         res.status(201).json({
             message: "User created successfully",
         });
@@ -19,7 +24,6 @@ export default async function UserSignup(req: Request, res: Response) {
             message: "Error creating user"
         });
     }
-
 }
 
 export async function UserLogin(req: Request, res: Response) {
@@ -38,15 +42,14 @@ export async function UserLogin(req: Request, res: Response) {
                 message: "Invalid credentials"
             });
         }
-    }catch(err) {
+        const token = jwt.sign({ userId: foundUser._id }, process.env.JWT_SECRET || "");
+        res.setHeader("token", token);
+        res.status(200).json({
+            message: "User logged in successfully"
+        });
+    }catch(err){
         res.status(500).json({
             message: "Error logging in user"
         });
     }
-
-    res.status(200).json({
-        message: "User logged in successfully",
-        user: {
-        },
-    });
 }
