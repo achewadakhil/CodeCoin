@@ -1,7 +1,16 @@
 
 import type { Request, Response, NextFunction } from "express";
 import {z} from "zod";
+import jwt from "jsonwebtoken";
 import checkLeetCodeUser from "../utils/isValidUser.js";
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: any;
+    }
+  }
+}
 
 export async function signUpValidation(req: Request, res: Response, next: NextFunction) {
     const schema = z.object({
@@ -27,7 +36,7 @@ export async function signUpValidation(req: Request, res: Response, next: NextFu
     }
 }
 
-export async function signInValidation(req: Request, res: Response, next: NextFunction) {
+export function signInValidation(req: Request, res: Response, next: NextFunction) {
     const schema = z.object({
         email: z.string().email({ message: "Invalid email format" }),
         password: z.string().min(6).max(100)
@@ -42,4 +51,22 @@ export async function signInValidation(req: Request, res: Response, next: NextFu
     } catch (error) {
         res.status(400).json({ message: "Invalid input data" });
     }
+}
+
+export function validateUser(req: Request, res: Response, next: NextFunction) {
+  const token = req.headers["token"] as string;
+
+  if (!token) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET || "", (err, decoded) => {
+    if (err) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    req.user = decoded;
+    console.log("User validated:", req.user);
+    next();
+  });
 }

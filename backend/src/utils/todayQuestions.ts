@@ -53,7 +53,7 @@ async function getQuestionInfo(slug: string): Promise<QuestionInfo | null> {
 export default async function getSet(){
 
     const records = getQuestions().record;
-    const len = getQuestions().len;
+    const len = getQuestions().len ? getQuestions().len : 3500;
     if(!records || len === 0) return 0;
     const todaySet = new Set();
     while (todaySet.size < 3) {

@@ -14,7 +14,7 @@ export async function UserSignup(req: Request, res: Response) {
             password : await bcrypt.hash(password, 10),
             username
         });
-        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET  || "");
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET  || "", { expiresIn: "1d" });
         res.setHeader("token", token);
         res.status(201).json({
             message: "User created successfully",
@@ -42,7 +42,7 @@ export async function UserLogin(req: Request, res: Response) {
                 message: "Invalid credentials"
             });
         }
-        const token = jwt.sign({ userId: foundUser._id }, process.env.JWT_SECRET || "");
+        const token = jwt.sign({ userId: foundUser._id }, process.env.JWT_SECRET || "", { expiresIn: "1d" });
         res.setHeader("token", token);
         res.status(200).json({
             message: "User logged in successfully"

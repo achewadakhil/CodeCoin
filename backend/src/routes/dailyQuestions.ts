@@ -1,10 +1,10 @@
 import express from "express";
 import { Router } from "express";
 import { submitQuestion } from "../controllers/dailyquestControllers.js";
-// import isValidUser from "../validators/isValidUser.js";
+import { validateUser } from "../validators/authValidators.js";
 
 const dailyQuestionRouter = Router();
 
-// dailyQuestionRouter.post("/submit", isValidUser , submitQuestion);
+dailyQuestionRouter.post("/submit", validateUser, submitQuestion);
 
 export default dailyQuestionRouter;
