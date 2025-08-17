@@ -14,7 +14,7 @@ export default function validateUser(req: Request, res: Response, next: NextFunc
   if (!result.success) {
     return res.status(400).json({ 
         error: "Invalid user data",
-        errors: result.error.flatten().fieldErrors
+        errors: result.error,
     });
   }
   const {email} = req.body;

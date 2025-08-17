@@ -1,11 +1,19 @@
 
-let questions : Record<string, string> = {};
-
-export function setQuestions(newSet : Record<string, string>) {
-    questions = newSet;
-    console.log(questions);
+type QuestionType = {
+    record : Record<string, string>,
+    len: number
 }
 
-export function getQuestions() {
+let questions : QuestionType = {
+    record: {},
+    len: 0
+};
+
+export function setQuestions(newSet : Record<string, string>) {
+    questions.record = newSet;
+    questions.len = Object.keys(newSet).length;
+}
+
+export function getQuestions()  : QuestionType {
     return questions;
 }
