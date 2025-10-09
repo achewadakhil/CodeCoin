@@ -1,6 +1,15 @@
 import type { Request, Response } from "express";
 import fetch from "node-fetch";
 
+type ContestHistory = {
+  attended: boolean;
+  rating: number;
+  contest: {
+    title: string;
+    startTime: number;
+  };
+};
+
 export default async function getUserLeetCode(req: Request, res: Response) {
   const { username } = req.query;
 
@@ -31,6 +40,14 @@ export default async function getUserLeetCode(req: Request, res: Response) {
               totalParticipants
               topPercentage
             }
+            userContestRankingHistory(username: $username) {
+              attended
+              rating
+              contest {
+                title
+                startTime
+              }
+            }
             recentSubmissionList(username: $username, limit: 20) {
               title
               titleSlug
@@ -44,7 +61,7 @@ export default async function getUserLeetCode(req: Request, res: Response) {
       }),
     });
 
-    const json = await response.json() as {
+    const json = (await response.json()) as {
       data: {
         matchedUser?: {
           profile: {
@@ -66,6 +83,7 @@ export default async function getUserLeetCode(req: Request, res: Response) {
           totalParticipants: number;
           topPercentage: number;
         } | null;
+        userContestRankingHistory: ContestHistory[];
         recentSubmissionList: Array<{
           title: string;
           titleSlug: string;
@@ -84,6 +102,43 @@ export default async function getUserLeetCode(req: Request, res: Response) {
     const stats = json.data.matchedUser.submitStats.acSubmissionNum;
     const contest = json.data.userContestRanking;
     const recentSubmissions = json.data.recentSubmissionList || [];
+
+    // ---- Calculate this week's rating change ----
+    const attended: ContestHistory[] = (json.data.userContestRankingHistory || []).filter(
+      (h) => h.attended
+    );
+
+    let latest: ContestHistory | null = null;
+    let prev: ContestHistory | null = null;
+
+    for (const contest of attended) {
+      if (!latest || contest.contest.startTime > latest.contest.startTime) {
+        prev = latest;
+        latest = contest;
+      } else if (!prev || contest.contest.startTime > prev.contest.startTime) {
+        prev = contest;
+      }
+    }
+
+    let weeklyRatingChange = 0;
+    let latestContestInfo: { title: string; date: string } | null = null;
+
+    if (latest && prev) {
+      const contestDate = new Date(latest.contest.startTime * 1000);
+      const now = new Date();
+      const weekAgo = new Date();
+      weekAgo.setDate(now.getDate() - 7);
+
+      if (contestDate >= weekAgo) {
+        weeklyRatingChange = latest.rating - prev.rating;
+        latestContestInfo = {
+          title: latest.contest.title,
+          date: contestDate.toISOString().split("T")[0] ?? "",
+        };
+      }
+    }
+
+    // ---- Filter today's submissions ----
     const today = new Date().toISOString().split("T")[0];
     const todaysSubmissions = recentSubmissions.filter(
       (sub) =>
@@ -93,6 +148,8 @@ export default async function getUserLeetCode(req: Request, res: Response) {
     res.json({
       username,
       contestRating: contest?.rating ?? null,
+      weeklyRatingChange,
+      latestContest: latestContestInfo,
       reputation: profile.reputation,
       solvedProblems: stats.find((d) => d.difficulty === "All")?.count || 0,
       breakdown: stats,
@@ -103,4 +160,3 @@ export default async function getUserLeetCode(req: Request, res: Response) {
     res.status(500).json({ error: "Failed to fetch data" });
   }
 }
-
