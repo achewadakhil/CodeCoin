@@ -4,7 +4,7 @@ export default async function getProblemMappings() {
   const limit = 100;
   let skip = 0;
   const mapping: Record<string, string> = {};
-
+  
   try {
     while (true) {
       const query = `
