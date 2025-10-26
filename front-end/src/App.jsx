@@ -11,7 +11,7 @@ export default function App() {
       <div>
         <Routes>
           <Route path="/" element={<Home />} />
-		  <Route path="/test" element = {<Test />}> </Route>
+		      <Route path="/test" element = {<Test />}> </Route>
         </Routes>
       </div>
     </BrowserRouter>
