@@ -1,26 +1,32 @@
-import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useContext, useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { AuthContext } from "../contexts/AuthContext";
+
 
 function Navbar() {
+  const { token, setToken } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const isHome = useLocation().pathname === "/";
+
   const [show, setShow] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
-  const isHome = useLocation().pathname === "/";
+
   const controlNavbar = () => {
-    if (typeof window !== "undefined") {
-      if (window.scrollY > lastScrollY) {
-        setShow(false);
-      } else {
-        setShow(true);
-      }
-      setLastScrollY(window.scrollY);
-    }
+    if (window.scrollY > lastScrollY) setShow(false);
+    else setShow(true);
+    setLastScrollY(window.scrollY);
+  };
+
+  const handleLogout = () => {
+    console.log(token);
+    setToken(null); 
+    console.log(token);
+    navigate("/signin");
   };
 
   useEffect(() => {
     window.addEventListener("scroll", controlNavbar);
-    return () => {
-      window.removeEventListener("scroll", controlNavbar);
-    };
+    return () => window.removeEventListener("scroll", controlNavbar);
   }, [lastScrollY]);
 
   return (
@@ -43,20 +49,38 @@ function Navbar() {
             </Link>
           </div>
           <div className="flex space-x-4">
-            <Link
-              to="/signin"
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-            >
-              Sign In
-            </Link>
-            <Link
-              to="/signup"
-              className="border border-blue-500 text-blue-500 px-4 py-2 rounded hover:bg-blue-500 hover:text-white"
-            >
-              Sign Up
-            </Link>
+            {token ? (
+              <>
+                <button
+                  onClick={handleLogout}
+                  className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                >
+                  Logout
+                </button>
+                <Link
+                  to="/profile"
+                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                >
+                  Profile
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/signin"
+                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  to="/signup"
+                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
           </div>
-
         </div>
       </div>
     </nav>
