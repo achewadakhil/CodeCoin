@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 function Navbar() {
   const [show, setShow] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
-
+  const isHome = useLocation().pathname === "/";
   const controlNavbar = () => {
     if (typeof window !== "undefined") {
       if (window.scrollY > lastScrollY) {
@@ -27,7 +27,7 @@ function Navbar() {
     <nav
       className={`w-full fixed top-0 left-0 z-50 transition-transform duration-300 ${
         show ? "translate-y-0" : "-translate-y-full"
-      }`}
+      } ${isHome ? "bg-transparent" : "bg-gray-900"}`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
