@@ -28,7 +28,7 @@ export async function UserSignup(req: Request, res: Response) {
 
 export async function UserLogin(req: Request, res: Response) {
     const { email, password } = req.body;
-
+    console.log("Hello from usrLogin");
     try{
         const foundUser = await UserModel.findOne({email});
         if(!foundUser) {
@@ -43,6 +43,7 @@ export async function UserLogin(req: Request, res: Response) {
             });
         }
         const token = jwt.sign({ userId: foundUser._id }, process.env.JWT_SECRET || "", { expiresIn: "1d" });
+        console.log(token);
         res.setHeader("token", token);
         res.status(200).json({
             message: "User logged in successfully"

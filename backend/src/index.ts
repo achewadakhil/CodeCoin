@@ -6,12 +6,21 @@ import codeRouter from "./routes/leetcodeRoutes.js";
 import "./utils/cron-Job.js";
 import dailyQuestionRouter from "./routes/dailyQuestions.js";
 import leaderBoardRouter from "./routes/leaderBoardRoutes.js";
+import cors from "cors";
 
 dotenv.config();
 
 const app = express();
 
+app.use(
+  cors({
+    origin: "*", 
+    exposedHeaders: ["token"],
+  })
+);
+
 app.use(express.json());
+
 
 //auth is correct
 app.use("/auth",authRouter);
