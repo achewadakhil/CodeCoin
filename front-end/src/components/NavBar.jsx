@@ -4,6 +4,14 @@ import { AuthContext } from "../contexts/AuthContext";
 
 
 function Navbar() {
+
+
+  const date = new Date();
+  const dd = String(date.getDate()).padStart(2,"0");
+  const mm = String(date.getMonth()).padStart(2,"0");
+  const yy = String(date.getFullYear());
+  const formattedDate = `/${dd}-${mm}-${yy}/daily-questions`
+
   const { token, setToken } = useContext(AuthContext);
   const navigate = useNavigate();
   const isHome = useLocation().pathname === "/";
@@ -41,7 +49,7 @@ function Navbar() {
             <Link to="/" className="text-white hover:text-blue-500">
               LeaderBoard
             </Link>
-            <Link to="/" className="text-white hover:text-blue-500">
+            <Link to={formattedDate} className="text-white hover:text-blue-500">
               TodayQuestions
             </Link>
             <Link to="/" className="text-white hover:text-blue-500">
