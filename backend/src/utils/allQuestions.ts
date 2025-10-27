@@ -1,73 +1,40 @@
 import fetch from "node-fetch";
+import fs from "fs";
+import path from "path";
 
-export default async function getProblemMappings() {
-  const limit = 100;
-  let skip = 0;
-  const mapping: Record<string, string> = {};
-  
+export default async function getAllLeetCodeProblems() {
   try {
-    while (true) {
-      const query = `
-        query problemsetQuestionList($limit: Int, $skip: Int) {
-          problemsetQuestionListV2(
-            categorySlug: ""
-            limit: $limit
-            skip: $skip
-          ) {
-            questions {
-              questionFrontendId
-              titleSlug
-            }
-          }
-        }
-      `;
+    console.log("Fetching all LeetCode problems at once...");
 
-      const response = await fetch("https://leetcode.com/graphql", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query,
-          variables: { limit, skip },
-        }),
-      });
+    const response = await fetch("https://leetcode.com/api/problems/all/", {
+      headers: {
+        "User-Agent": "Mozilla/5.0",
+      },
+    });
 
-      const data = await response.json() as {
-        errors?: any;
-        data?: {
-          problemsetQuestionListV2?: {
-            questions?: Array<{ questionFrontendId: string; titleSlug: string }>;
-          };
-        };
-      };
-
-      if (data.errors) {
-        console.error("GraphQL Errors:", data.errors);
-        return null;
-      }
-
-      if (!data.data || !data.data.problemsetQuestionListV2) {
-        console.error("Unexpected response:", data);
-        return null;
-      }
-
-      const questions = data.data.problemsetQuestionListV2.questions;
-
-      if (!questions || questions.length === 0) break; 
-
-      questions.forEach((q: any) => {
-        mapping[q.questionFrontendId] = q.titleSlug;
-      });
-
-      console.log(`Fetched ${skip + questions.length} questions...`);
-
-      skip += limit;
-
-      if (questions.length < limit) break;
+    if (!response.ok) {
+      throw new Error(`HTTP Error: ${response.status}`);
     }
+    const data: any = await response.json();
+    const problems = Array.isArray(data?.stat_status_pairs)
+      ? data.stat_status_pairs.map((item: any) => ({
+          questionId: item.stat.question_id,
+          questionFrontendId: item.stat.frontend_question_id,
+          title: item.stat.question__title,
+          titleSlug: item.stat.question__title_slug,
+          difficulty: item.difficulty?.level,
+          paidOnly: item.paid_only,
+        }))
+      : [];
+    const filePath = path.join(process.cwd(), "src", "cache", "leetcode.json");
+    fs.writeFileSync(filePath, JSON.stringify(problems, null, 2));
 
-    return mapping;
-  } catch (err) {
-    console.error("Failed to fetch problems:", err);
+    console.log(`Successfully fetched ${problems.length} problems.`);
+    console.log(`Saved to: ${filePath}`);
+
+    return problems;
+  } catch (error) {
+    console.error("Failed to fetch LeetCode problems:", error);
     return null;
   }
 }
