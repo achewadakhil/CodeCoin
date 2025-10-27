@@ -2,10 +2,14 @@ import express from "express";
 import { Router } from "express";
 import { submitQuestion } from "../controllers/dailyquestControllers.js";
 import { validateUser } from "../validators/authValidators.js";
+import getTodayQuestions from "../controllers/getDailyQuestions.js";
 
 const dailyQuestionRouter = Router();
 
 //when a user submits a question (button) checking in leetcode for last 24 hours
 dailyQuestionRouter.post("/submit", validateUser, submitQuestion);
+
+//questions changes everyday at 0:02
+dailyQuestionRouter.get("/today-questions",validateUser, getTodayQuestions);
 
 export default dailyQuestionRouter;

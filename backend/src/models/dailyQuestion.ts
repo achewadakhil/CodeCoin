@@ -16,3 +16,4 @@ const dailyQuestionSchema = new Schema({
 const dailyQuestionModel = mongoose.model("TodayQuestions", dailyQuestionSchema);
 
 export default dailyQuestionModel;
+
