@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 export default function DailyQuestions() {
   const [todayQuestions, setTodayQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [solved, setSolved] = useState({}); // { title: true }
+  const [solved, setSolved] = useState({});
   useEffect(() => {
       const saved = localStorage.getItem("solvedQuestions");
       if (saved) setSolved(JSON.parse(saved));
@@ -52,8 +52,6 @@ export default function DailyQuestions() {
 
             return (
               <div key={i} className="relative bg-gray-800 rounded-xl p-5 flex flex-col gap-3 shadow-lg">
-
-                {/* Title + checkbox */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div
@@ -78,8 +76,6 @@ export default function DailyQuestions() {
                     {q.difficulty}
                   </span>
                 </div>
-
-                {/* Buttons */}
                 <div className="flex gap-4 mt-2">
                   <a 
                     href={q.link} 
