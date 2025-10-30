@@ -3,14 +3,15 @@ import dailyQuestionModel from "../models/dailyQuestion.js";
 
 
 export default async function getTodayQuestions(req: Request, res: Response) {
-  try {
-    const date = new Date();
-    const dd = String(date.getDate()).padStart(2, "0");
-    const mm = String(date.getMonth() + 1).padStart(2, "0");
-    const yy = date.getFullYear();
-    const formattedDate = `${dd}-${mm}-${yy}`;
-
-    const todayQuestions = await dailyQuestionModel.findOne({ date: formattedDate });
+    try {
+        const date = new Date();
+        const dd = String(date.getDate()).padStart(2, "0");
+        const mm = String(date.getMonth() + 1).padStart(2, "0");
+        const yy = date.getFullYear();
+        const formattedDate = `${dd}-${mm}-${yy}`;
+        
+        const todayQuestions = await dailyQuestionModel.findOne({ date: formattedDate });
+        console.log("Here");
 
     if (!todayQuestions) {
       return res.status(404).json({

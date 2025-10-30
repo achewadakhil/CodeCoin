@@ -10,6 +10,6 @@ const dailyQuestionRouter = Router();
 dailyQuestionRouter.post("/submit", validateUser, submitQuestion);
 
 //questions changes everyday at 0:02
-dailyQuestionRouter.get("/today-questions",validateUser, getTodayQuestions);
+dailyQuestionRouter.get("/today-questions", getTodayQuestions);
 
 export default dailyQuestionRouter;
