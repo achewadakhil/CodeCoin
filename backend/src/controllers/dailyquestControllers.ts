@@ -10,15 +10,16 @@ interface RecentSubmission {
   statusDisplay: string;
   lang: string;
 }
+
 export async function submitQuestion(req: Request, res: Response) {
-  const { questionId, titleSlug } = req.body;
-  console.log("submitQuestion called with:", { questionId, titleSlug });
+  const { titleSlug } = req.body;
+  console.log("submitQuestion called with:", { titleSlug });
 
   try {
     if (!req.user?.userId) {
       return res.status(401).json({ message: "Unauthorized in submitQuestions" });
     }
-
+    
     const foundUser = await UserModel.findById(req.user.userId);
     if (!foundUser) {
       return res.status(404).json({ message: "User not found" });
@@ -26,6 +27,7 @@ export async function submitQuestion(req: Request, res: Response) {
 
     const username = foundUser.username;
     console.log("Checking submissions for LeetCode user:", username);
+
     const query = `
       query recentAcSubmissions($username: String!, $limit: Int) {
         recentAcSubmissionList(username: $username, limit: $limit) {
@@ -63,6 +65,7 @@ export async function submitQuestion(req: Request, res: Response) {
     }
 
     const submissions = json.data?.recentAcSubmissionList ?? [];
+
     const today = new Date().toLocaleDateString();
 
     const solvedToday = submissions.some((sub) => {
@@ -73,7 +76,6 @@ export async function submitQuestion(req: Request, res: Response) {
     return res.status(200).json({
       message: "Question submission checked successfully",
       data: {
-        questionId,
         titleSlug,
         userId: foundUser._id,
         solvedToday,
