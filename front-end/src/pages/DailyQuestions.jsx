@@ -4,16 +4,38 @@ export default function DailyQuestions() {
   const [todayQuestions, setTodayQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [solved, setSolved] = useState({});
+
   useEffect(() => {
-      const saved = localStorage.getItem("solvedQuestions");
-      if (saved) setSolved(JSON.parse(saved));
-      
-      (async () => {
+    (async () => {
+      try {
+        const res = await fetch("http://localhost:3000/daily-questions/today-questions", {
+          cache: "no-store"
+        });
+        const data = await res.json();
+        setTodayQuestions(data.questions);
+        data.questions.forEach(async (q) => {
           try {
-              const res = await fetch("http://localhost:3000/daily-questions/today-questions", { cache: "no-store" });
-              const data = await res.json();
-              setTodayQuestions(data.questions);
-            } catch (err) {
+            const res = await fetch("http://localhost:3000/daily-questions/submit", {
+              method: "POST",
+              headers: { 
+                "Content-Type": "application/json" ,
+                "token" : localStorage.getItem("authToken")
+              },
+              credentials: "include",
+              body: JSON.stringify({ titleSlug: q.titleSlug })
+            });
+
+            const result = await res.json();
+
+            if (result?.data?.solvedToday) {
+              setSolved(prev => ({ ...prev, [q.title]: true }));
+            }
+          } catch (err) {
+            console.log("Error checking solved:", err);
+          }
+        });
+
+      } catch (err) {
         console.log("Error while fetching problems", err);
       } finally {
         setLoading(false);
@@ -30,12 +52,6 @@ export default function DailyQuestions() {
     }
   };
 
-  const toggleSolved = (title) => {
-    const updated = { ...solved, [title]: !solved[title] };
-    setSolved(updated);
-    localStorage.setItem("solvedQuestions", JSON.stringify(updated));
-  };
-
   return (
     <div className="min-h-screen bg-gray-900 text-white px-6 py-10 pt-20">
       <h1 className="text-2xl font-bold mb-6 border-b border-gray-700 pb-2">
@@ -46,7 +62,6 @@ export default function DailyQuestions() {
         <p className="text-gray-400 animate-pulse">Loading today's questions...</p>
       ) : (
         <div className="space-y-6">
-
           {todayQuestions.map((q, i) => {
             const isSolved = solved[q.title];
 
@@ -55,12 +70,11 @@ export default function DailyQuestions() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div
-                      onClick={() => toggleSolved(q.title)}
                       className={`
-                        w-6 h-6 flex items-center justify-center rounded-full border-2 cursor-pointer transition-all
-                        ${isSolved 
+                        w-6 h-6 flex items-center justify-center rounded-full border-2 transition-all
+                        ${isSolved
                           ? "bg-green-500 border-green-400 shadow-md shadow-green-500/60 scale-110"
-                          : "border-gray-500 hover:border-white"
+                          : "border-gray-500"
                         }
                       `}
                     >
@@ -76,25 +90,21 @@ export default function DailyQuestions() {
                     {q.difficulty}
                   </span>
                 </div>
+
                 <div className="flex gap-4 mt-2">
-                  <a 
-                    href={q.link} 
+                  <a
+                    href={q.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-1.5 rounded-lg text-sm font-medium transition-all hover:scale-105 active:scale-95 shadow-md hover:shadow-blue-500/30"
+                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-1.5 rounded-lg text-sm font-medium transition-all hover:scale-105 shadow-md hover:shadow-blue-500/30"
                   >
                     Solve
                   </a>
-
-                  <button className="bg-purple-600 hover:bg-purple-700 px-4 py-1 rounded-lg text-sm font-medium transition-all">
-                    Submit
-                  </button>
                 </div>
 
               </div>
             );
           })}
-
         </div>
       )}
     </div>
