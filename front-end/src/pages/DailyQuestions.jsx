@@ -1,32 +1,61 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"; 
 
 export default function DailyQuestions() {
   const [todayQuestions, setTodayQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [solved, setSolved] = useState({});
+  const [authError, setAuthError] = useState("");
+
+  const navigate = useNavigate();
 
   useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      setAuthError("Please login to view today's questions.");
+      setTimeout(() => navigate("/signin"), 1500);
+      return;
+    }
+
     (async () => {
       try {
         const res = await fetch("http://localhost:3000/daily-questions/today-questions", {
-          cache: "no-store"
+          cache: "no-store",
+          headers: { 
+            "Content-Type": "application/json",
+            "token": token
+          },
+          credentials: "include"
         });
+
+        if (res.status === 401) {
+          setAuthError("Session expired. Redirecting to login...");
+          setTimeout(() => navigate("/signin"), 1500);
+          return;
+        }
+
         const data = await res.json();
         setTodayQuestions(data.questions);
+
         data.questions.forEach(async (q) => {
           try {
             const res = await fetch("http://localhost:3000/daily-questions/submit", {
               method: "POST",
               headers: { 
-                "Content-Type": "application/json" ,
-                "token" : localStorage.getItem("authToken")
+                "Content-Type": "application/json",
+                "token": token
               },
               credentials: "include",
               body: JSON.stringify({ titleSlug: q.titleSlug })
             });
 
-            const result = await res.json();
+            if (res.status === 401) {
+              setAuthError("Session expired. Redirecting to login...");
+              setTimeout(() => navigate("/signin"), 1500);
+              return;
+            }
 
+            const result = await res.json();
             if (result?.data?.solvedToday) {
               setSolved(prev => ({ ...prev, [q.title]: true }));
             }
@@ -51,6 +80,14 @@ export default function DailyQuestions() {
       default: return "text-gray-400 bg-gray-800";
     }
   };
+
+  if (authError) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center text-white text-lg">
+        {authError}
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-900 text-white px-6 py-10 pt-20">
