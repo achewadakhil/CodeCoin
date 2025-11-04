@@ -1,17 +1,20 @@
-
 import mongoose from "mongoose";
-import {Schema} from "mongoose";
+const { Schema } = mongoose;
+
+const dailySolvedSchema = new Schema({
+  date: { type: String, required: true },
+  titleSlug: { type: String, required: true }
+},{ _id : false});
 
 const userSchema = new Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   username: { type: String, required: true, unique: true },
-  todaySolved: { type: Number, default: 0 },
-  solvedThisWeek: { type: Number, default: 0 },
-  solvedThisMonth: { type: Number, default: 0 },
-  totalSolved: { type: Number, default: 0 }
+  
+  totalSolved: { type: Number, default: 0 },
+  xp: { type: Number, default: 0 },
+  dailySolved: [dailySolvedSchema] 
 });
 
 const UserModel = mongoose.model("Users", userSchema);
-
 export default UserModel;

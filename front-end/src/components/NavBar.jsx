@@ -47,12 +47,15 @@ function Navbar() {
         <div className="flex justify-between h-16 items-center">
           <div className="flex space-x-6 text-xl">
             <Link to="/" className="text-white hover:text-blue-500">
+              CodeCoin
+            </Link>
+            <Link to="/" className="text-white hover:text-blue-500">
               LeaderBoard
             </Link>
             <Link to={formattedDate} className="text-white hover:text-blue-500">
               TodayQuestions
             </Link>
-            <Link to="/" className="text-white hover:text-blue-500">
+            <Link to="/profile" className="text-white hover:text-blue-500">
               Profile
             </Link>
           </div>

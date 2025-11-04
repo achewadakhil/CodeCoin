@@ -7,6 +7,7 @@ import Signin from "./pages/Signin";
 import Signup from "./pages/SIgnup";
 import { AuthProvider } from "./contexts/AuthContext";
 import DailyQuestions from "./pages/DailyQuestions";
+import ProfilePage from "./pages/Profile";
 
 export default function App() {
   
@@ -22,7 +23,8 @@ export default function App() {
         <div className="bg-[#003e77]">
           <Routes >
             <Route path = "/" element={<Home />} />
-            <Route path = "/test" element = {<Test />}> </Route>
+            <Route path = "/profile" element = {<ProfilePage />} />
+            <Route path = "/test" element = {<Test />} />
             <Route path = "/signin" element = {<Signin />} />
             <Route path = "/signup" element = {<Signup />}/>
             <Route path = {formattedDate} element = {<DailyQuestions />} />

@@ -21,7 +21,8 @@ export async function UserSignup(req: Request, res: Response) {
         });
     }catch(err) {
         res.status(500).json({
-            message: "Error creating user"
+            message: "Error creating user",
+            err
         });
     }
 }

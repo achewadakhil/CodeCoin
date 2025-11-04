@@ -7,9 +7,10 @@ import getTodayQuestions from "../controllers/getDailyQuestions.js";
 const dailyQuestionRouter = Router();
 
 //when a user submits a question (button) checking in leetcode for last 24 hours
+//later add the validation for the user
 dailyQuestionRouter.post("/submit", validateUser, submitQuestion);
 
 //questions changes everyday at 0:02
-dailyQuestionRouter.get("/today-questions", getTodayQuestions);
+dailyQuestionRouter.get("/today-questions", validateUser, getTodayQuestions);
 
 export default dailyQuestionRouter;
