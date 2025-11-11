@@ -11,22 +11,31 @@ interface RecentSubmission {
   lang: string;
 }
 
+function getDateNumber(date = new Date()): number {
+  return (
+    date.getFullYear() * 10000 +
+    (date.getMonth() + 1) * 100 +
+    date.getDate()
+  );
+}
+
 export async function submitQuestion(req: Request, res: Response) {
-  const { titleSlug , difficulty} = req.body;
-  console.log("submitQuestion called with:", { titleSlug , difficulty});
+  const { titleSlug, difficulty } = req.body;
+  console.log("submitQuestion called with:", { titleSlug, difficulty });
 
   try {
     if (!req.user?.userId) {
-      return res.status(401).json({ message: "Unauthorized in submitQuestions" });
+      return res
+        .status(401)
+        .json({ message: "Unauthorized in submitQuestions" });
     }
-    
+
     const foundUser = await UserModel.findById(req.user.userId);
     if (!foundUser) {
       return res.status(404).json({ message: "User not found" });
     }
 
     const username = foundUser.username;
-    console.log("Checking submissions for LeetCode user:", username);
 
     const query = `
       query recentAcSubmissions($username: String!, $limit: Int) {
@@ -40,7 +49,6 @@ export async function submitQuestion(req: Request, res: Response) {
         }
       }
     `;
-
     const variables = { username, limit: 50 };
 
     const response = await fetch("https://leetcode.com/graphql/", {
@@ -66,59 +74,83 @@ export async function submitQuestion(req: Request, res: Response) {
 
     const submissions = json.data?.recentAcSubmissionList ?? [];
 
-    const today = new Date().toLocaleDateString();
-    // console.log(`today : ${today}`);
+    const todayNum = getDateNumber();
+
     const solvedToday = submissions.some((sub) => {
-      const subDate = new Date(sub.timestamp * 1000).toLocaleDateString();
-      // console.log("subDate :",subDate);
-      return sub.titleSlug === titleSlug && subDate === today;
+      const subDateNum = getDateNumber(new Date(sub.timestamp * 1000));
+      return sub.titleSlug === titleSlug && subDateNum === todayNum;
     });
 
-
-    if(solvedToday){
-      const isAlreadySolved = foundUser.dailySolved.some((entry)=>{
-        return (entry.titleSlug === titleSlug && entry.date === today);
+    if (!solvedToday) {
+      return res.status(200).json({
+        message: "No matching submission found for today.",
+        data: { titleSlug, solvedToday: false },
       });
-      if(!isAlreadySolved){
-
-        let xpGained = 0;
-
-        if(difficulty === 'Easy')  xpGained = 10;
-        else if(difficulty === 'Medium')  xpGained = 20;
-        else  xpGained = 30;
-
-        foundUser.dailySolved.push({
-          date : today,
-          titleSlug
-        });
-
-        foundUser.totalSolved += 1;
-
-        foundUser.xp += xpGained;
-
-        await foundUser.save();
-
-        return res.status(200).json({
-          message: "Solution validated and added",
-          data: {
-            titleSlug,
-            userId: foundUser._id,
-            solvedToday,
-            xp : foundUser.xp
-          },
-        });
-      }else{
-        return res.status(200).json({
-          message: "Solution already exists",
-          data: {
-            titleSlug,
-            userId: foundUser._id,
-            solvedToday,
-            xp : foundUser.xp
-          },
-        });
-      }
     }
+
+    let xpGained = 0;
+    if (difficulty === "Easy") xpGained = 10;
+    else if (difficulty === "Medium") xpGained = 20;
+    else xpGained = 30;
+
+    const isAlreadySolved = foundUser.dailySolved.some(
+      (entry) => entry.titleSlug === titleSlug && entry.date === todayNum
+    );
+
+    if (isAlreadySolved) {
+      return res.status(200).json({
+        message: "Solution already exists for today.",
+        data: {
+          titleSlug,
+          userId: foundUser._id,
+          solvedToday,
+          xp: foundUser.xp,
+        },
+      });
+    }
+
+    const updateExisting = await UserModel.updateOne(
+      {
+        _id: foundUser._id,
+        "dailyPoints.date": todayNum,
+      },
+      {
+        $inc: {
+          "dailyPoints.$.points": xpGained,
+          xp: xpGained,
+          totalSolved: 1,
+        },
+        $push: { dailySolved: { date: todayNum, titleSlug } },
+      }
+    );
+
+    if (updateExisting.modifiedCount === 0) {
+      await UserModel.updateOne(
+        {
+          _id: foundUser._id,
+          "dailyPoints.date": { $ne: todayNum },
+        },
+        {
+          $push: {
+            dailyPoints: { date: todayNum, points: xpGained },
+            dailySolved: { date: todayNum, titleSlug },
+          },
+          $inc: { xp: xpGained, totalSolved: 1 },
+        }
+      );
+    }
+
+    const updatedUser = await UserModel.findById(foundUser._id);
+
+    return res.status(200).json({
+      message: "Solution validated and added",
+      data: {
+        titleSlug,
+        userId: foundUser._id,
+        solvedToday: true,
+        xp: updatedUser?.xp,
+      },
+    });
   } catch (err) {
     console.error("Error in submitQuestion:", err);
     return res.status(500).json({ message: "Failed to check submission" });
