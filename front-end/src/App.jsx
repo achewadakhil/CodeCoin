@@ -8,6 +8,7 @@ import Signup from "./pages/SIgnup";
 import { AuthProvider } from "./contexts/AuthContext";
 import DailyQuestions from "./pages/DailyQuestions";
 import ProfilePage from "./pages/Profile";
+import OnboardingSimple from "./pages/OnBoaring";
 
 export default function App() {
   
@@ -27,6 +28,7 @@ export default function App() {
             <Route path = "/test" element = {<Test />} />
             <Route path = "/signin" element = {<Signin />} />
             <Route path = "/signup" element = {<Signup />}/>
+            <Route path = "/onBoarding" element = {<OnboardingSimple />} />
             <Route path = {formattedDate} element = {<DailyQuestions />} />
           </Routes>
         </div>

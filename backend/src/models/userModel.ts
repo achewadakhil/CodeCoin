@@ -25,6 +25,9 @@ const userSchema = new Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   username: { type: String, required: true, unique: true },
+  name : {type : String},
+  bio : {type : String},
+  onboardedAt : {type : Date},
 
   totalSolved: { type: Number, default: 0 },
   xp: { type: Number, default: 0 },

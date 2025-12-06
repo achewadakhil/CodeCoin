@@ -32,7 +32,7 @@ function Signup() {
 
       if (res.ok) {
         localStorage.setItem("authToken", token);
-        navigate("/"); // redirect after signup
+        navigate("/onBoarding"); // redirect to onBoaring after signUp
       } else {
         setError(data.message || "Signup failed");
       }

@@ -53,6 +53,8 @@ export function signInValidation(req: Request, res: Response, next: NextFunction
     }
 }
 
+//explicitly include the token in the local storage it is as the authToken
+
 export function validateUser(req: Request, res: Response, next: NextFunction) {
   const token = req.headers["token"] as string;
   // console.log("Token received:", token);
