@@ -16,4 +16,5 @@ authRouter.get("/profile", validateUser, getDetails);
 
 authRouter.post("/onBoarding",validateUser,onBoarding);
 
+
 export default authRouter;

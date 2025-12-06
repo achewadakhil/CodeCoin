@@ -5,7 +5,6 @@ import mongoose from "mongoose";
 import codeRouter from "./routes/leetcodeRoutes.js";
 import "./utils/cron-Job.js";
 import dailyQuestionRouter from "./routes/dailyQuestions.js";
-import leaderBoardRouter from "./routes/leaderBoardRoutes.js";
 import cors from "cors";
 
 dotenv.config();
@@ -27,7 +26,6 @@ app.use(express.json());
 app.use("/auth",authRouter);
 app.use("/leetcode",codeRouter);
 app.use("/daily-questions", dailyQuestionRouter);
-app.use("/leaderboard", leaderBoardRouter);
 
 (async () => {
   const mongoUri = process.env.MONGODB_URI;
