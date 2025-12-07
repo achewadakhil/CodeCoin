@@ -49,9 +49,6 @@ function Navbar() {
             <Link to="/" className="text-white hover:text-blue-500">
               CodeCoin
             </Link>
-            <Link to="/" className="text-white hover:text-blue-500">
-              LeaderBoard
-            </Link>
             <Link to={formattedDate} className="text-white hover:text-blue-500">
               TodayQuestions
             </Link>
