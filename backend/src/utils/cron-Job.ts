@@ -29,6 +29,7 @@ cron.schedule("0 0 1 * *", async () => {
 cron.schedule("2 0 * * *", async () => {
   try {
 
+    console.log("Daily questions getting updated :");
     const rawData = fs.readFileSync(CACHE_PATH, "utf-8");
     const problems = JSON.parse(rawData);
 
